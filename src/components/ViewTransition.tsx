@@ -1,6 +1,6 @@
-import { Component, StrictMode } from 'react'
+import { Component, StrictMode, PropsWithChildren } from 'react'
 
-export default class ViewTransition extends Component {
+export default class ViewTransition extends Component<PropsWithChildren> {
   shouldComponentUpdate() {
     if (!document.startViewTransition) return true // skip when not supported
 
@@ -20,7 +20,7 @@ export default class ViewTransition extends Component {
     return <StrictMode>{this.props.children}</StrictMode>
   }
 
-  #rendered = () => { }
+  #rendered = (...args: any[]) => { }
 
   componentDidUpdate() {
     // resolve the `updateDOM` promise to notify the View Transition API
