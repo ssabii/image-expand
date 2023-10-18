@@ -1,3 +1,58 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.thumbnail {
+  contain: layout;
+}
+
+.title {
+  view-transition-name: title;
+  contain: layout;
+}
+
+.price {
+  view-transition-name: price;
+  contain: layout;
+}
+
+.badge {
+  view-transition-name: badge;
+  contain: layout;
+}
+
+::view-transition-old(title),
+::view-transition-old(price),
+::view-transition-old(badge) {
+  animation-name: slide-down, fade-out;
+}
+
+::view-transition-new(title),
+::view-transition-new(price),
+::view-transition-new(badge) {
+  animation-name: slide-up, fade-in;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(2rem)
+  }
+}
+
+@keyframes slide-down {
+  to {
+    transform: translateY(2rem)
+  }
+}

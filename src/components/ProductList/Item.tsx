@@ -26,9 +26,9 @@ function Item({ item }: ItemProps) {
         height={0}
         sizes="100vw"
       />
-      <span className="badge my-2 block text-sm text-amber-600 ">New</span>
-      <div className="title text-base font-semibold text-center min-h-[48px]">{name}</div>
-      <div className="price text-sm mt-2">{formattedPrice}</div>
+      <span className="my-2 block text-sm text-amber-600 ">New</span>
+      <div className="text-base font-semibold text-center min-h-[48px]">{name}</div>
+      <div className="text-sm mt-2">{formattedPrice}</div>
     </Link>
   )
 }
