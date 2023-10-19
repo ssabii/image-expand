@@ -1,40 +1,66 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## View Transitions API 어썸 예제
+[View Transitions API](https://developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API)를 활용해서 제품 목록이 존재하고 제품을 클릭하면 상세 페이지로 이동하면서 이미지도 같이 이동하는 예제입니다. [photography-view-transitions-nextjs](https://github.com/domchristie/photography-view-transitions-nextjs)를 참고해서 구현하였습니다. app router 환경에서는 제대로 동작하지 않는 것 같아서 page router 환경에서 구현했습니다.
 
-## Getting Started
+## 구현을 위한 설정
+- 컴포넌트가 두번 렌더링 되지 않게 `next.config.js`의 `reactStrictMode`를 false로 설정
+- 페이지 이동 시 이전 상태의 스크린샷을 찍기 위해 `ViewTransition`을 만들어서 `_app.tsx`에 감싸주어서 모든 페이지에 적용
 
-First, run the development server:
+```tsx
+// ViewTransition.tsx
+import { Component, StrictMode, PropsWithChildren } from 'react'
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+export default class ViewTransition extends Component<PropsWithChildren> {
+  shouldComponentUpdate() {
+    if (!document.startViewTransition) return true // skip when not supported
+
+    document.startViewTransition(() => this.#updateDOM())
+    return false // don't update the component, we'll do this manually
+  }
+
+  #updateDOM() {
+    // now we know the screenshot has been taken, we can force render
+    // (which skips `shouldComponentUpdate`)
+    this.forceUpdate()
+    // set up a promise that will resolve when the component renders
+    return new Promise(resolve => { this.#rendered = resolve })
+  }
+
+  render() {
+    return <StrictMode>{this.props.children}</StrictMode>
+  }
+
+  #rendered = (...args: any[]) => { }
+
+  componentDidUpdate() {
+    // resolve the `updateDOM` promise to notify the View Transition API
+    // that the DOM has been updated
+    this.#rendered()
+  }
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- 코드를 인식할 수 있게 `index.d.ts`에 `startViewTransition` 타입 정의
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+```ts
+export { };
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+declare global {
+  interface Document {
+    startViewTransition(callback: () => void): {
+      ready: Promise<void>,
+      updateCallbackDone: Promise<void>,
+      finished: Promise<void>
+    }
+  }
+}
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## 라우팅 구성
 
-## Learn More
+- `/list`: 상품 목록 페이지, 상품 클릭 시 상세 페이지로 이동
+- `/list/[id]`: 상품 상세 페이지, 상품 이미지 클릭 시 목록으로 이동
 
-To learn more about Next.js, take a look at the following resources:
+## 구현 화면
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+![awesome](images/awesome.gif)
